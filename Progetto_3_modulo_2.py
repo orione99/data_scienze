@@ -68,18 +68,21 @@ df['sales'] = df['sales'].astype('float')
 df['profit'] = df['profit'].astype('float')
 df['area'] = df['area'].astype('category')
 
-
+# Stampo l'utilizzo di memoria
 print(f'Memoria usata: {df.memory_usage(deep=True).sum() / (1024**2)} MB')
 
+# Calcolo profitto mensile e quantita venduta mensile
 profit_mens = df.groupby(pd.Grouper(key='order_dates', freq='ME'))['profit'].sum()
 quantity_mens = df.groupby(pd.Grouper(key='order_dates', freq='ME'))['quantity'].sum()
 
 print(f'Profitti mensili:\n',profit_mens)
 print(f'Quantità vendute mensili:\n',quantity_mens)
 
+# Sub-category piu vendute 
 sub_cat_piu_vednute = df.groupby('sub_category')['quantity'].sum().sort_values(ascending=False)
 print(f'Top 5 sub category per quantita vednute:\n',sub_cat_piu_vednute)
 
+# Creo le coordinate per le singole regioni
 region_coords = {
     'Lombardia': (45.4642, 9.1900),
     'Piemonte': (45.0703, 7.6869),
@@ -89,6 +92,7 @@ region_coords = {
     'Puglia': (41.1256, 16.8667)
 }
 
+# Creo le due nuove colonne latitudine e longitudine
 df['lat'] = df['regions'].map(lambda x: region_coords[x][0])
 df['lon'] = df['regions'].map(lambda x: region_coords[x][1])
 
@@ -98,6 +102,7 @@ map_df = df.groupby(['regions', 'lat', 'lon'], as_index=False).agg({
     'quantity': 'sum'
 })
 
+# Importo plotly.express per creare una mappa topografica interattiva che rappresenti le vendite
 import plotly.express as px
 
 fig = px.scatter_mapbox(
@@ -120,4 +125,5 @@ fig = px.scatter_mapbox(
 
 fig.update_layout(mapbox_style="open-street-map")
 
+# Mostro il risultato
 fig.show()
